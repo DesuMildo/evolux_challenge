@@ -1,0 +1,36 @@
+[tool.poetry]
+name = "evolux_challenge"
+version = "0.1.0"
+description = "Solution to Evolux challenge."
+authors = ["Romildo Oliveira Souza Júnior <romildo@mildo.dev>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+Flask = "^2.1.2"
+Flask-SQLAlchemy = "^2.5.1"
+flask-marshmallow = "^0.14.0"
+Flask-Migrate = "^3.1.0"
+Flask-JWT-Extended = "^4.3.1"
+passlib = "^1.7.4"
+marshmallow-sqlalchemy = "^0.28.0"
+psycopg2 = "^2.9.3"
+gunicorn = {extras = ["gevent"], version = "^20.1.0"}
+
+[tool.poetry.dev-dependencies]
+black = "^22.3.0"
+coverage = {extras = ["toml"], version = "^6.3.2"}
+pre-commit = "^2.19.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.coverage.run]
+command_line = "-m unittest discover -v tests"
+source = ["app"]
+branch = true
+
+[tool.coverage.report]
+fail_under = 100
+show_missing = true

@@ -1,0 +1,61 @@
+default_language_version:
+    python: python3.10
+
+repos:
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.2.0
+    hooks:
+    -   id: end-of-file-fixer
+    -   id: trailing-whitespace
+    -   id: mixed-line-ending
+        args: ["--fix=lf"]
+    -   id: debug-statements
+    -   id: detect-private-key
+    -   id: check-added-large-files
+    -   id: no-commit-to-branch
+    -   id: check-merge-conflict
+    -   id: check-ast
+    -   id: check-yaml
+    -   id: check-json
+    -   id: check-toml
+-   repo: https://github.com/psf/black
+    rev: 22.3.0
+    hooks:
+    -   id: black
+-   repo: https://github.com/pycqa/flake8
+    rev: 4.0.1
+    hooks:
+    -   id: flake8
+-   repo: local
+    hooks:
+    -   id: coverage-run
+        name: coverage-run
+        entry: coverage run
+        language: python
+        pass_filenames: false
+        fail_fast: true
+    -   id: coverage-report
+        name: coverage-report
+        entry: coverage report
+        language: python
+        pass_filenames: false
+    -   id: poetry-check
+        name: poetry-check
+        entry: poetry check
+        language: python
+        pass_filenames: false
+        fail_fast: true
+        files: ^pyproject.toml$
+    -   id: poetry-lock
+        name: poetry-lock
+        entry: poetry lock
+        language: python
+        pass_filenames: false
+        fail_fast: true
+    -   id: poetry-export
+        name: poetry-export
+        entry: poetry export
+        language: python
+        pass_filenames: false
+        files: ^poetry.lock$
+        args: ["-f", "requirements.txt", "-o", "infra/prod/requirements.txt"]

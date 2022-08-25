@@ -1,0 +1,45 @@
+services:
+  web:
+    build:
+      context: ../../
+      dockerfile: infra/prod/Dockerfile
+    environment:
+      - FLASK_ENV=production
+      - SQLALCHEMY_DATABASE_URI=postgresql://${POSTGRES_USER:?err}:${POSTGRES_PASSWORD:?err}@db/${POSTGRES_DB:?err}
+      - SQLALCHEMY_TRACK_MODIFICATIONS=False
+      - DOMAIN=${DOMAIN:?err}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY:?err}
+    command: >
+      sh -c "
+        flask db upgrade &&
+        gunicorn -c infra/prod/gunicorn.conf.py
+      "
+    volumes:
+      - ../../:/code:ro
+      - logs_gunicorn:/var/log/gunicorn/${DOMAIN:?err}
+    depends_on:
+      - db
+  db:
+    image: postgres:14.2
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB:?err}
+      - POSTGRES_USER=${POSTGRES_USER:?err}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?err}
+    volumes:
+      - postgres_data_prod:/var/lib/postgresql/data
+  nginx:
+    image: nginx:1.20.2
+    environment:
+      - DOMAIN=${DOMAIN:?err}
+    volumes:
+      - ./nginx.conf.template:/etc/nginx/templates/nginx.conf.template:ro
+      - logs_nginx:/var/log/nginx/${DOMAIN:?err}
+    ports:
+      - "80:80"
+    depends_on:
+      - web
+
+volumes:
+  postgres_data_prod:
+  logs_gunicorn:
+  logs_nginx:
