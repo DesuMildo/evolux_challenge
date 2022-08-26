@@ -301,3 +301,21 @@ class TestNumberCreate(TestFlaskBase):
 
             self.assertEqual(response.status_code, 422)
             self.assertEqual(response.json, expected_response)
+
+
+class TestNumberUpdate(TestFlaskBase):
+    def test_update_success(self):
+        create_numbers_response_list = self.create_n_numbers(1)
+
+        change_data = {"currency": "BRL"}
+
+        expected_response = create_numbers_response_list[0] | change_data
+
+        response = self.client.patch(
+            url_for("bp_v1.bp_number.update", id=1),
+            json=change_data,
+            headers=self.create_token(),
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json, expected_response)
