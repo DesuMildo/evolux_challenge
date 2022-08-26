@@ -418,3 +418,13 @@ class TestNumberDelete(TestFlaskBase):
 
         self.assertEqual(response.status_code, 404)
         self.assertEqual(response.json, expected_response)
+
+
+class TestNumberModel(TestFlaskBase):
+    def test_repr_blank_success(self):
+        number_repr = repr(Number())
+
+        self.assertEqual(
+            number_repr,
+            """<Number (id=None, value=None, monthyPrice=None, setupPrice=None, currency=None)>""",
+        )
