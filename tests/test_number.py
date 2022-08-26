@@ -357,3 +357,22 @@ class TestNumberUpdate(TestFlaskBase):
 
         self.assertEqual(response.status_code, 422)
         self.assertEqual(response.json, expected_response)
+    
+    def test_update_id_unknown_field_failure(self):
+        self.create_n_numbers(1)
+
+        change_data = {"id": 1}
+
+        expected_response = {
+            "message": "ValidationError",
+            "errors": {"id": ["Unknown field."]},
+        }
+
+        response = self.client.patch(
+            url_for("bp_v1.bp_number.update", id=1),
+            json=change_data,
+            headers=self.create_token(),
+        )
+
+        self.assertEqual(response.status_code, 422)
+        self.assertEqual(response.json, expected_response)
