@@ -93,3 +93,90 @@ class TestUserCreate(TestFlaskBase):
 
         self.assertEqual(response.status_code, 422)
         self.assertEqual(response.json, expected_response)
+
+class TestUserLogin(TestFlaskBase):
+    def test_login_success(self):
+        response = self.client.post(url_for("bp_v1.bp_user.login"), json=self.user)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(list(response.json.keys()), ["access_token", "refresh_token"])
+
+    def test_login_invalid_credentials(self):
+        request_data = {
+            "username": "invalid",
+            "password": "123456",
+        }
+
+        expected_response = {
+            "message": "AuthenticationError",
+            "errors": {"_credentials": ["Invalid credentials."]},
+        }
+
+        response = self.client.post(url_for("bp_v1.bp_user.login"), json=request_data)
+
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.json, expected_response)
+
+    def test_login_missing_field_failure(self):
+        request_data = {
+            "password": "123456",
+        }
+
+        expected_response = {
+            "message": "ValidationError",
+            "errors": {"username": ["Missing data for required field."]},
+        }
+
+        response = self.client.post(url_for("bp_v1.bp_user.login"), json=request_data)
+
+        self.assertEqual(response.status_code, 422)
+        self.assertEqual(response.json, expected_response)
+
+    def test_login_blank_field_failure(self):
+        request_data = {
+            "username": "",
+            "password": "123456",
+        }
+
+        expected_response = {
+            "message": "ValidationError",
+            "errors": {"username": "Field is blank."},
+        }
+
+        response = self.client.post(url_for("bp_v1.bp_user.login"), json=request_data)
+
+        self.assertEqual(response.status_code, 422)
+        self.assertEqual(response.json, expected_response)
+
+    def test_login_empty_failure(self):
+        request_data = {}
+
+        expected_response = {
+            "message": "ValidationError",
+            "errors": {
+                "username": ["Missing data for required field."],
+                "password": ["Missing data for required field."],
+            },
+        }
+
+        response = self.client.post(url_for("bp_v1.bp_user.login"), json=request_data)
+
+        self.assertEqual(response.status_code, 422)
+        self.assertEqual(response.json, expected_response)
+
+    def test_login_id_unknown_field_failure(self):
+        request_data = {
+            "id": 1,
+            "username": "test",
+            "password": "123456",
+        }
+
+        expected_response = {
+            "message": "ValidationError",
+            "errors": {"id": ["Unknown field."]},
+        }
+
+        response = self.client.post(url_for("bp_v1.bp_user.login"), json=request_data)
+
+        self.assertEqual(response.status_code, 422)
+        self.assertEqual(response.json, expected_response)
