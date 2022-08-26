@@ -376,3 +376,20 @@ class TestNumberUpdate(TestFlaskBase):
 
         self.assertEqual(response.status_code, 422)
         self.assertEqual(response.json, expected_response)
+    
+    def test_update_invalid_id_failure(self):
+        change_data = {"currency": "BRL"}
+
+        expected_response = {
+            "errors": "The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.",
+            "message": "Not Found",
+        }
+
+        response = self.client.patch(
+            url_for("bp_v1.bp_number.update", id=1),
+            json=change_data,
+            headers=self.create_token(),
+        )
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.json, expected_response)
