@@ -144,6 +144,36 @@ class TestNumberList(TestFlaskBase):
         self.assertEqual(response.status_code, 404)
         self.assertEqual(response.json, expected_response)
 
+    def test_list_filter_by_ddi_success(self):
+        ddi = 55
+        create_numbers_response_list_ddi55 = self.create_n_numbers(15, ddi=ddi)
+        self.create_n_numbers(10, ddi=ddi + 1)
+
+        response = self.client.get(
+            url_for("bp_v1.bp_number.list", ddi=ddi),
+            headers=self.create_token(),
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json["pagination"]["count"], 15)
+        self.assertEqual(response.json["results"], create_numbers_response_list_ddi55)
+
+    def test_list_filter_by_negative_ddi_failure(self):
+        ddi = -1
+
+        expected_response = {
+            "errors": {"value": ["DDI cannot be negative."]},
+            "message": "ValidationError",
+        }
+
+        response = self.client.get(
+            url_for("bp_v1.bp_number.list", ddi=ddi),
+            headers=self.create_token(),
+        )
+
+        self.assertEqual(response.status_code, 422)
+        self.assertEqual(response.json, expected_response)
+
 
 class TestNumberShow(TestFlaskBase):
     def test_show_success(self):
