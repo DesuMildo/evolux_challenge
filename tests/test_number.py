@@ -229,3 +229,48 @@ class TestNumberCreate(TestFlaskBase):
 
         self.assertEqual(response.status_code, 422)
         self.assertEqual(response.json, expected_response)
+
+    def test_create_empty_failure(self):
+        request_data = {}
+
+        expected_response = {
+            "message": "ValidationError",
+            "errors": {
+                "value": ["Missing data for required field."],
+                "monthyPrice": ["Missing data for required field."],
+                "currency": ["Missing data for required field."],
+                "setupPrice": ["Missing data for required field."],
+            },
+        }
+
+        response = self.client.post(
+            url_for("bp_v1.bp_number.create"),
+            json=request_data,
+            headers=self.create_token(),
+        )
+
+        self.assertEqual(response.status_code, 422)
+        self.assertEqual(response.json, expected_response)
+
+    def test_create_id_unknown_field_failure(self):
+        request_data = {
+            "id": 1,
+            "value": "+55 84 91234-4321",
+            "monthyPrice": "0.03",
+            "setupPrice": "3.40",
+            "currency": "U$",
+        }
+
+        expected_response = {
+            "message": "ValidationError",
+            "errors": {"id": ["Unknown field."]},
+        }
+
+        response = self.client.post(
+            url_for("bp_v1.bp_number.create"),
+            json=request_data,
+            headers=self.create_token(),
+        )
+
+        self.assertEqual(response.status_code, 422)
+        self.assertEqual(response.json, expected_response)
