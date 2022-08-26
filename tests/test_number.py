@@ -428,3 +428,19 @@ class TestNumberModel(TestFlaskBase):
             number_repr,
             """<Number (id=None, value=None, monthyPrice=None, setupPrice=None, currency=None)>""",
         )
+
+    def test_repr_non_blank_success(self):
+        number_repr = repr(
+            Number(
+                id=42,
+                value="+55 84 91234-4321",
+                monthyPrice="0.03",
+                setupPrice="3.40",
+                currency="U$",
+            )
+        )
+
+        self.assertEqual(
+            number_repr,
+            """<Number (id=42, value=+55 84 91234-4321, monthyPrice=0.03, setupPrice=3.40, currency=U$)>""",
+        )
