@@ -144,6 +144,31 @@ class TestNumberList(TestFlaskBase):
         self.assertEqual(response.status_code, 404)
         self.assertEqual(response.json, expected_response)
 
+class TestNumberShow(TestFlaskBase):
+    def test_show_success(self):
+        create_numbers_response_list = self.create_n_numbers(1)
+
+        response = self.client.get(
+            url_for("bp_v1.bp_number.show", id=1), headers=self.create_token()
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json, create_numbers_response_list[0])
+
+    def test_show_invalid_id_failure(self):
+        expected_response = {
+            "errors": "The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.",
+            "message": "Not Found",
+        }
+
+        response = self.client.get(
+            url_for("bp_v1.bp_number.show", id=1), headers=self.create_token()
+        )
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.json, expected_response)
+
+
 class TestNumberCreate(TestFlaskBase):
     def test_create_success(self):
         request_data = {
