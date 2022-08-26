@@ -23,9 +23,9 @@ class TestFlaskBase(TestCase):
         self.app.db.session.remove()
         self.app.db.drop_all()
 
-    def create_n_numbers(self, quantity):
+    def create_n_numbers(self, quantity, ddi=55):
         request_data = {
-            "value": "",
+            "value": f"+{ddi}",
             "monthyPrice": "0.03",
             "setupPrice": "3.40",
             "currency": "U$",

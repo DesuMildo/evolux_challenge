@@ -10,8 +10,20 @@ bp_number = Blueprint("bp_number", __name__)
 def list():
     page = request.args.get("page", type=int)
     per_page = request.args.get("per_page", type=int)
+    ddi = request.args.get("ddi", type=int)
 
-    numbers = Number.query.paginate(page, per_page)
+    if ddi is not None:
+        if ddi >= 0:
+            numbers = Number.query.filter(Number.value.startswith(f"+{ddi}")).paginate(
+                page, per_page
+            )
+        else:
+            return {
+                "message": "ValidationError",
+                "errors": {"value": ["DDI cannot be negative."]},
+            }, 422
+    else:
+        numbers = Number.query.paginate(page, per_page)
 
     next_url = (
         url_for(
