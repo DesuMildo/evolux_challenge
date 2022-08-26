@@ -1,0 +1,145 @@
+from app.modules.number.models import Number
+from flask import url_for
+
+from test_flask_base import TestFlaskBase
+
+
+class TestNumberList(TestFlaskBase):
+    def test_list_empty_success(self):
+        response = self.client.get(
+            url_for("bp_v1.bp_number.list"), headers=self.create_token()
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json["pagination"]["count"], 0)
+        self.assertEqual(response.json["results"], [])
+
+    def test_list_one_success(self):
+        create_numbers_response_list = self.create_n_numbers(1)
+
+        response = self.client.get(
+            url_for("bp_v1.bp_number.list"), headers=self.create_token()
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json["pagination"]["count"], 1)
+        self.assertEqual(response.json["results"], create_numbers_response_list)
+
+    def test_list_n_success(self):
+        create_numbers_response_list = self.create_n_numbers(15)
+
+        response = self.client.get(
+            url_for("bp_v1.bp_number.list"), headers=self.create_token()
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json["pagination"]["count"], 15)
+        self.assertEqual(response.json["results"], create_numbers_response_list)
+
+    def test_list_pagination_success(self):
+        create_numbers_response_list = self.create_n_numbers(30)
+        page = 3
+        per_page = 5
+
+        response = self.client.get(
+            url_for("bp_v1.bp_number.list", page=page, per_page=per_page),
+            headers=self.create_token(),
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json["pagination"]["count"], 30)
+        self.assertEqual(response.json["pagination"]["page"], page)
+        self.assertEqual(response.json["pagination"]["per_page"], per_page)
+        self.assertEqual(
+            response.json["results"],
+            create_numbers_response_list[(page - 1) * per_page : page * per_page],
+        )
+
+    def test_list_pagination_implicit_page_success(self):
+        create_numbers_response_list = self.create_n_numbers(30)
+        per_page = 5
+
+        response = self.client.get(
+            url_for("bp_v1.bp_number.list", per_page=per_page),
+            headers=self.create_token(),
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json["pagination"]["count"], 30)
+        self.assertEqual(response.json["pagination"]["page"], 1)
+        self.assertEqual(response.json["pagination"]["per_page"], per_page)
+        self.assertEqual(
+            response.json["results"], create_numbers_response_list[:per_page]
+        )
+
+    def test_list_pagination_implicit_per_page_success(self):
+        create_numbers_response_list = self.create_n_numbers(30)
+        page = 1
+
+        response = self.client.get(
+            url_for("bp_v1.bp_number.list", page=page),
+            headers=self.create_token(),
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json["pagination"]["count"], 30)
+        self.assertEqual(response.json["pagination"]["page"], page)
+        self.assertEqual(response.json["pagination"]["per_page"], 20)
+        self.assertEqual(
+            response.json["results"],
+            create_numbers_response_list[(page - 1) * 20 : page * 20],
+        )
+
+    def test_list_pagination_invalid_page_failure(self):
+        self.create_n_numbers(30)
+        page = -1
+        per_page = 5
+
+        expected_response = {
+            "errors": "The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.",
+            "message": "Not Found",
+        }
+
+        response = self.client.get(
+            url_for("bp_v1.bp_number.list", page=page, per_page=per_page),
+            headers=self.create_token(),
+        )
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.json, expected_response)
+
+    def test_list_pagination_invalid_per_page_failure(self):
+        self.create_n_numbers(30)
+        page = 1
+        per_page = -1
+
+        expected_response = {
+            "errors": "The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.",
+            "message": "Not Found",
+        }
+
+        response = self.client.get(
+            url_for("bp_v1.bp_number.list", page=page, per_page=per_page),
+            headers=self.create_token(),
+        )
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.json, expected_response)
+
+    def test_list_pagination_invalid_page_and_per_page_failure(self):
+        self.create_n_numbers(30)
+        page = -1
+        per_page = -1
+
+        expected_response = {
+            "errors": "The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.",
+            "message": "Not Found",
+        }
+
+        response = self.client.get(
+            url_for("bp_v1.bp_number.list", page=page, per_page=per_page),
+            headers=self.create_token(),
+        )
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.json, expected_response)
