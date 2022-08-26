@@ -207,3 +207,25 @@ class TestNumberCreate(TestFlaskBase):
 
         self.assertEqual(response.status_code, 422)
         self.assertEqual(response.json, expected_response)
+
+    def test_create_blank_field_failure(self):
+        request_data = {
+            "value": "",
+            "monthyPrice": "0.03",
+            "setupPrice": "3.40",
+            "currency": "U$",
+        }
+
+        expected_response = {
+            "message": "ValidationError",
+            "errors": {"value": "Field is blank."},
+        }
+
+        response = self.client.post(
+            url_for("bp_v1.bp_number.create"),
+            json=request_data,
+            headers=self.create_token(),
+        )
+
+        self.assertEqual(response.status_code, 422)
+        self.assertEqual(response.json, expected_response)
