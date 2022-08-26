@@ -232,3 +232,53 @@ class TestUserAccessToken(TestFlaskBase):
 
         self.assertEqual(response.status_code, 422)
         self.assertEqual(response.json, expected_response)
+
+
+class TestUserRefreshToken(TestFlaskBase):
+    def test_refresh_token_success(self):
+        refresh_token = self.client.post(
+            url_for("bp_v1.bp_user.login"), json=self.user
+        ).json["refresh_token"]
+
+        response = self.client.post(
+            url_for("bp_v1.bp_user.refresh_token"),
+            headers={"Authorization": f"""Bearer {refresh_token}"""},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(list(response.json.keys()), ["access_token"])
+
+    def test_refresh_token_missing_authorization_header_failure(self):
+        expected_response = {"msg": "Missing Authorization Header"}
+
+        response = self.client.post(url_for("bp_v1.bp_user.refresh_token"))
+
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.json, expected_response)
+
+    def test_refresh_token_blank_authorization_header_failure(self):
+        expected_response = {
+            "msg": "Bad Authorization header. Expected 'Authorization: Bearer <JWT>'"
+        }
+
+        response = self.client.post(
+            url_for("bp_v1.bp_user.refresh_token"), headers={"Authorization": "Bearer "}
+        )
+
+        self.assertEqual(response.status_code, 422)
+        self.assertEqual(response.json, expected_response)
+
+    def test_refresh_token_using_access_token_failure(self):
+        expected_response = {"msg": "Only refresh tokens are allowed"}
+
+        access_token = self.client.post(
+            url_for("bp_v1.bp_user.login"), json=self.user
+        ).json["access_token"]
+
+        response = self.client.post(
+            url_for("bp_v1.bp_user.refresh_token"),
+            headers={"Authorization": f"""Bearer {access_token}"""},
+        )
+
+        self.assertEqual(response.status_code, 422)
+        self.assertEqual(response.json, expected_response)
