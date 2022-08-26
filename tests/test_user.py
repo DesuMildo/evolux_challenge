@@ -3,6 +3,7 @@ from flask import url_for
 
 from test_flask_base import TestFlaskBase
 
+
 class TestUserCreate(TestFlaskBase):
     def test_create_success(self):
         request_data = {
@@ -94,6 +95,7 @@ class TestUserCreate(TestFlaskBase):
         self.assertEqual(response.status_code, 422)
         self.assertEqual(response.json, expected_response)
 
+
 class TestUserLogin(TestFlaskBase):
     def test_login_success(self):
         response = self.client.post(url_for("bp_v1.bp_user.login"), json=self.user)
@@ -177,6 +179,56 @@ class TestUserLogin(TestFlaskBase):
         }
 
         response = self.client.post(url_for("bp_v1.bp_user.login"), json=request_data)
+
+        self.assertEqual(response.status_code, 422)
+        self.assertEqual(response.json, expected_response)
+
+
+class TestUserAccessToken(TestFlaskBase):
+    def test_access_token_success(self):
+        access_token = self.client.post(
+            url_for("bp_v1.bp_user.login"), json=self.user
+        ).json["access_token"]
+
+        response = self.client.get(
+            url_for("bp_v1.bp_number.list"),
+            headers={"Authorization": f"""Bearer {access_token}"""},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json["results"], [])
+
+    def test_access_token_missing_authorization_header_failure(self):
+        expected_response = {"msg": "Missing Authorization Header"}
+
+        response = self.client.get(url_for("bp_v1.bp_number.list"))
+
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.json, expected_response)
+
+    def test_access_token_blank_authorization_header_failure(self):
+        expected_response = {
+            "msg": "Bad Authorization header. Expected 'Authorization: Bearer <JWT>'"
+        }
+
+        response = self.client.get(
+            url_for("bp_v1.bp_number.list"), headers={"Authorization": "Bearer "}
+        )
+
+        self.assertEqual(response.status_code, 422)
+        self.assertEqual(response.json, expected_response)
+
+    def test_access_token_using_refresh_token_failure(self):
+        expected_response = {"msg": "Only non-refresh tokens are allowed"}
+
+        refresh_token = self.client.post(
+            url_for("bp_v1.bp_user.login"), json=self.user
+        ).json["refresh_token"]
+
+        response = self.client.get(
+            url_for("bp_v1.bp_number.list"),
+            headers={"Authorization": f"""Bearer {refresh_token}"""},
+        )
 
         self.assertEqual(response.status_code, 422)
         self.assertEqual(response.json, expected_response)
