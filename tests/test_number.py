@@ -143,3 +143,21 @@ class TestNumberList(TestFlaskBase):
 
         self.assertEqual(response.status_code, 404)
         self.assertEqual(response.json, expected_response)
+
+class TestNumberCreate(TestFlaskBase):
+    def test_create_success(self):
+        request_data = {
+            "value": "+55 84 91234-4321",
+            "monthyPrice": "0.03",
+            "setupPrice": "3.40",
+            "currency": "U$",
+        }
+
+        response = self.client.post(
+            url_for("bp_v1.bp_number.create"),
+            json=request_data,
+            headers=self.create_token(),
+        )
+
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.json, request_data | {"id": 1})
