@@ -144,6 +144,7 @@ class TestNumberList(TestFlaskBase):
         self.assertEqual(response.status_code, 404)
         self.assertEqual(response.json, expected_response)
 
+
 class TestNumberShow(TestFlaskBase):
     def test_show_success(self):
         create_numbers_response_list = self.create_n_numbers(1)
@@ -357,7 +358,7 @@ class TestNumberUpdate(TestFlaskBase):
 
         self.assertEqual(response.status_code, 422)
         self.assertEqual(response.json, expected_response)
-    
+
     def test_update_id_unknown_field_failure(self):
         self.create_n_numbers(1)
 
@@ -376,7 +377,7 @@ class TestNumberUpdate(TestFlaskBase):
 
         self.assertEqual(response.status_code, 422)
         self.assertEqual(response.json, expected_response)
-    
+
     def test_update_invalid_id_failure(self):
         change_data = {"currency": "BRL"}
 
@@ -393,3 +394,14 @@ class TestNumberUpdate(TestFlaskBase):
 
         self.assertEqual(response.status_code, 404)
         self.assertEqual(response.json, expected_response)
+
+
+class TestNumberDelete(TestFlaskBase):
+    def test_delete_success(self):
+        self.create_n_numbers(1)
+
+        response = self.client.delete(
+            url_for("bp_v1.bp_number.delete", id=1), headers=self.create_token()
+        )
+
+        self.assertEqual(response.status_code, 204)
