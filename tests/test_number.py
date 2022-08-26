@@ -276,31 +276,31 @@ class TestNumberCreate(TestFlaskBase):
         self.assertEqual(response.json, expected_response)
 
     def test_create_non_unique_value_failure(self):
-            request_data = {
-                "value": "+55 84 91234-4321",
-                "monthyPrice": "0.03",
-                "setupPrice": "3.40",
-                "currency": "U$",
-            }
+        request_data = {
+            "value": "+55 84 91234-4321",
+            "monthyPrice": "0.03",
+            "setupPrice": "3.40",
+            "currency": "U$",
+        }
 
-            expected_response = {
-                "message": "ValidationError",
-                "errors": {"value": ["Value already exists."]},
-            }
+        expected_response = {
+            "message": "ValidationError",
+            "errors": {"value": ["Value already exists."]},
+        }
 
-            self.client.post(
-                url_for("bp_v1.bp_number.create"),
-                json=request_data,
-                headers=self.create_token(),
-            )
-            response = self.client.post(
-                url_for("bp_v1.bp_number.create"),
-                json=request_data,
-                headers=self.create_token(),
-            )
+        self.client.post(
+            url_for("bp_v1.bp_number.create"),
+            json=request_data,
+            headers=self.create_token(),
+        )
+        response = self.client.post(
+            url_for("bp_v1.bp_number.create"),
+            json=request_data,
+            headers=self.create_token(),
+        )
 
-            self.assertEqual(response.status_code, 422)
-            self.assertEqual(response.json, expected_response)
+        self.assertEqual(response.status_code, 422)
+        self.assertEqual(response.json, expected_response)
 
 
 class TestNumberUpdate(TestFlaskBase):
