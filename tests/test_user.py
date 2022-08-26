@@ -282,3 +282,21 @@ class TestUserRefreshToken(TestFlaskBase):
 
         self.assertEqual(response.status_code, 422)
         self.assertEqual(response.json, expected_response)
+
+
+class TestUserModel(TestFlaskBase):
+    def test_repr_blank_success(self):
+        user_repr = repr(User())
+
+        self.assertEqual(
+            user_repr,
+            """<User (id=None, username=None)>""",
+        )
+
+    def test_repr_non_blank_success(self):
+        user_repr = repr(User(id=1, username="test"))
+
+        self.assertEqual(
+            user_repr,
+            """<User (id=1, username=test)>""",
+        )
